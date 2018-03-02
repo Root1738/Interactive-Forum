@@ -25,23 +25,37 @@ const CCVDiv = document.querySelector('#cc-v-div');
 const inputCCNum = document.querySelector('#cc-num');
 const inputCCZip = document.querySelector('#zip')
 const inputCCV = document.querySelector('#cvv');
+
 // cost actively calculates total cost of
 // selected checkboxes then displays it if > 0
 let cost = 0;
 
+// creating booleans for each required input element
+// setting all default values to false
+// variable will become true when it passes validation test
 let validName = false;
 let validEmail = false;
 let validCheckbox = false;
 let validPayment = false;
-let validCCNum = false;
-let validCCZip = false;
-let validCCV = false;
+  // if payment method is 'credit card',
+  // these additional variables must also be true
+  let validCCNum = false;
+  let validCCZip = false;
+  let validCCV = false;
+
+
 // Creating & Appending total cost &
 // then setting default display to hidden
 fieldsetActivities.appendChild(priceLabel);
 priceLabel.style.display = 'none';
 
-/* Hidden Validation Elements */
+/* Hidden Validation Elements --------*/
+
+/*
+/ creates error messages customized to each input option
+/ all error messages are set to hidden by default
+/ when a user clicks the submit button or clicks
+*/
 const validNameError = document.createElement('p');
 validNameError.textContent = 'Please Enter a Valid Name';
 fieldsetBasic.insertBefore(validNameError, inputName);
@@ -185,42 +199,56 @@ const toggleCheckboxes = (e) => {
   } else {
     priceLabel.style.display = 'none';
   }
+  // each time a checkbox's state is changed, it will
+  // check to see if a minimum of 1 checkbox is clicked
+  // if not, form won't be able to submit
   validationCheckboxes();
 }
 
 const payment = (e) => {
+  // storing user's payment option in payment method
   const paymentMethod = e.target.value;
   if (paymentMethod === 'credit card') {
-    // Credit Card isn't set valid until both CC & Zip are true
+    // validpayment isn't set true until both ZIP, Number,
+    // and CVV are set true
     validPayment = false;
+    // hides other payment options
     creditDiv.style.display = '';
     paypalDiv.style.display = 'none';
     bitcoinDiv.style.display = 'none';
   } else if (paymentMethod === 'paypal') {
     validPayment = true;
+    // hides other payment options
     paypalDiv.style.display = '';
     creditDiv.style.display = 'none';
     bitcoinDiv.style.display = 'none';
   } else if (paymentMethod === 'bitcoin') {
     validPayment = true;
+    // hides other payment options
     bitcoin.style.display = ''
     creditDiv.style.display = 'none';
     paypalDiv.style.display = 'none';
   } else {
+    // if no payment method is selected
     validPayment = false;
+    // hides all payment options until
+    // a user picks one
     creditDiv.style.display = 'none';
     paypalDiv.style.display = 'none';
     bitcoinDiv.style.display = 'none';
   }
 }
 
-/* Validation Checks ----------*/
+/* Validation Checks */
 
 const validationName = () => {
-  if (inputName.value.length === 0 || inputName.value.length > 20) {
+  // checks to make sure entered name is greater than 0 and less than 40 characters long
+  // if name isn't valid, an error message will appear
+  if (inputName.value.length === 0 || inputName.value.length > 40) {
     inputName.style.borderColor = 'red';
     validNameError.style.display = '';
     validName = false;
+    // if it is valid, previous error messages will be hidden
   } else {
     validNameError.style.display = 'none';
     inputName.style.borderColor ='';
@@ -229,11 +257,14 @@ const validationName = () => {
 }
 
 const validationEmail = () => {
+  // checks to make sure email contains required characterss
   const emailCheck = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+  // if valid, hide email error messages
   if (emailCheck.test(inputEmail.value)) {
     validEmailError.style.display = 'none';
     inputEmail.style.borderColor ='';
     validEmail = true;
+  // else display email error messages
   } else {
     inputEmail.style.borderColor = 'red';
     validEmailError.style.display = '';
@@ -242,48 +273,66 @@ const validationEmail = () => {
 }
 
 const validationCheckboxes = () => {
+  // setting default validation check to false
   let validCbox = false;
+  // loops through all checkboxes to see
+  // if a checkbox is checked, then validation will
+  // be set to true and loop will break, otherwise it will remain false
   for (let i = 0; i < cboxActivities.length; i += 1) {
     if (cboxActivities[i].checked) {
       validCbox = true;
       break;
     }
   }
+  // if checkboxes pass validation, hide any error messages
   if (validCbox) {
     validCheckboxError.style.display = 'none';
     cboxLegend.style.marginBottom = '';
+  // otherwise show error messages
   } else {
     validCheckboxError.style.display = '';
     cboxLegend.style.marginBottom = 0;
   }
+  // returns true/false on whether or not checkboxes were valid
   return validCbox;
 }
 
 const validationPayment = () => {
+  // if the user's paymenth method = credit card
   if (selectPayment.value === 'credit card') {
+    // check to make sure that the ZIP, NUM, and CCV are all set to true(valid)
     if (validCCZip && validCCNum & validCCV) {
       return true;
     } else {
       return false;
     }
+    // if payment option is paypal or bitcoin, no additional validation checks are required so return true
   } else if (selectPayment.value === 'paypal' || selectPayment.value === 'bitcoin') {
     return true;
-  } else {
+  } else { // if payment method isn't credit/paypal/bitcoin, return false since it isn't a valid payment option
     return false;
   }
 }
 
 const validationCCNum = () => {
+  // if the credit card number isn't entered yet
+  // display an error and validCCNUM is set to false
   if (inputCCNum.value.length === 0) {
     validCCNumError.style.display = '';
     validCCNumError.textContent = 'Please Enter a Credit Card';
     inputCCNum.style.borderColor = 'red';
     validCCNum = false;
+  // if credit card number > 0 < 13 or > 16
+  // tell user to enter a number that's between 13-16 digits
+  // sets validCCNUm to false
   } else if (inputCCNum.value.length < 13 || inputCCNum.value.length > 16) {
     validCCNumError.style.display = '';
     validCCNumError.textContent = 'Credit Card must be between 13 and 16 digits long.';
     inputCCNum.style.borderColor = 'red';
     validCCNum = false;
+    // if user's credit card number is greater than 13
+    // and less then 16 digits long, set validCCNum to true
+    // and hide any error messages
   } else {
     validCCNum = true;
     validCCNumError.style.display = 'none';
@@ -292,10 +341,14 @@ const validationCCNum = () => {
 }
 
 const validationCCZip = () => {
+  // if the zipcode isn't 5 digits long
+  // display an error and set validCCZip to false
   if (inputCCZip.value.length !== 5) {
     validCCZip = false;
     validCCZipError.style.display = '';
     inputCCZip.style.borderColor = 'red';
+  // if the zipcode is 5 digits long
+  // hide any error messages & set validCCZip to true
   } else {
     validCCZip = true;
     validCCZipError.style.display = 'none';
@@ -304,10 +357,14 @@ const validationCCZip = () => {
 }
 
 const validationCCV = () => {
+  // if the creditCard CVV isn't 3
+  // display an error and set validCCV to false
   if (inputCCV.value.length !== 3) {
     validCCV = false;
     validCCVError.style.display = '';
     inputCCV.style.borderColor = 'red';
+  // if the creditCard CVV is 3
+  // hide all errors and set validCCV to true
   } else {
     validCCV = true;
     validCCVError.style.display = 'none';
@@ -316,6 +373,11 @@ const validationCCV = () => {
 }
 
 const missingRequired = () => {
+  // this function will be called when a user clicks the 'submit' button
+  // and one field didn't pass the required validation Checks
+  //
+  // it will outline all the required fields with a red border
+  // and display an alert at the top
   missingRequiredAlert.style.display = '';
   inputEmail.style.borderColor = 'red';
   inputCCNum.style.borderColor = 'red';
@@ -324,13 +386,22 @@ const missingRequired = () => {
 }
 
 const validation = () => {
+  // stores true/false value in validCheckbox
+  // depending on whether or not one checkbox is checked
   validCheckbox = validationCheckboxes();
+  // checks to make sure user's method of payment passes all requirements
+  // stores true/false in validPayment
   validPayment = validationPayment();
+  // if all input fields are set to true (which means they all passed validation)
   if (validName && validEmail && validCheckbox && validPayment) {
+    // then hide the missing required fields error
     missingRequiredAlert.style.display = 'none';
+    // return true to the submit button, which allows the form to be submitted
     return true;
+  // if one input field isn't valid (false), display the missing required fields error
   } else {
     missingRequired();
+    // return false to the submit button listener, which prevents the form from being submitted
     return false;
   }
 }
@@ -383,21 +454,26 @@ selectDesign.addEventListener('change', (e) => {
     colorDiv.style.display = 'none';
   }
 });
-
+// when a checkbox's status is changed, call toggleCheckboxes();
 fieldsetActivities.addEventListener('change', toggleCheckboxes);
+// when a user's payment option is changed, call payment();
 selectPayment.addEventListener('change', payment);
 
 /* Validation Listeners */
 
+// will run individual validation checks on selected input field when a user clicks away/out of input field
 inputName.addEventListener('blur', validationName);
 inputEmail.addEventListener('blur', validationEmail);
 inputCCNum.addEventListener('blur', validationCCNum);
 inputCCZip.addEventListener('blur', validationCCZip);
 inputCCV.addEventListener('blur', validationCCV);
 
+// final listener, which runs a final validation test on all inputs
 submitButton.addEventListener('click', (e) => {
+  // if validation checks are true, allow form to be submitted
   if (validation()) {
     console.log('Success!');
+  // if validation checks are false, prevent form from being submitted
   } else {
     e.preventDefault();
     console.log('Form has invalid fields.');
