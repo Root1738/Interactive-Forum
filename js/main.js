@@ -1,11 +1,15 @@
+const form = document.querySelector('form');
 const fieldsetBasic = document.querySelector('form fieldset:first-child');
 const fieldsetActivities = document.querySelector('.activities');
 const inputName = document.querySelector('#name');
+const inputEmail = document.querySelector('#mail');
 const selectJobRole = document.querySelector('#title');
 const inputJobRole = document.querySelector('#other-title');
 const selectDesign = document.querySelector('#design');
 const selectColor = document.querySelector('#color');
 const colorOptions = document.querySelector('#color').options;
+const cboxLegend = fieldsetActivities.querySelector('legend');
+const firstcboxLabel = document.querySelector('.activities label:nth-of-type(1)');
 const cboxActivities = document.querySelectorAll('.activities input');
 const priceLabel = document.createElement('label');
 const selectPayment = document.querySelector('#payment');
@@ -13,15 +17,73 @@ const paymentOptions = selectPayment.options;
 const creditDiv = document.querySelector('#credit-card');
 const paypalDiv = document.querySelector('#paypal');
 const bitcoinDiv = document.querySelector('#bitcoin');
+const CCNumDiv = document.querySelector('#cc-num-div');
+const CCZipDiv = document.querySelector('#cc-zip-div')
+const CCVDiv = document.querySelector('#cc-v-div');
+const inputCCNum = document.querySelector('#cc-num');
+const inputCCZip = document.querySelector('#zip')
+const inputCCV = document.querySelector('#cvv');
+// cost actively calculates total cost of
+// selected checkboxes then displays it if > 0
 let cost = 0;
 
+let validName = false;
+let validEmail = false;
+let validCheckbox = false;
+let validPayment = false;
+let validCCNum = false;
+let validCCZip = false;
+let validCCV = false;
 // Creating & Appending total cost &
 // then setting default display to hidden
 fieldsetActivities.appendChild(priceLabel);
 priceLabel.style.display = 'none';
 
+/* Hidden Validation Elements */
+const validNameError = document.createElement('p');
+validNameError.textContent = 'Please Enter a Valid Name';
+fieldsetBasic.insertBefore(validNameError, inputName);
+validNameError.style.display = 'none';
+validNameError.style.color = 'red';
 
-/* Functions */
+const validEmailError = document.createElement('p');
+validEmailError.textContent = 'Please Enter a Valid Email';
+fieldsetBasic.insertBefore(validEmailError, inputEmail);
+validEmailError.style.display = 'none';
+validEmailError.style.color = 'red';
+
+const validCheckboxError = document.createElement('p');
+validCheckboxError.textContent = 'Please select an option';
+fieldsetActivities.insertBefore(validCheckboxError, firstcboxLabel);
+validCheckboxError.style.display = 'none';
+validCheckboxError.style.color = 'red';
+
+const validCCNumError = document.createElement('p');
+validCCNumError.textContent = 'Please Enter a Credit Card';
+CCNumDiv.appendChild(validCCNumError);
+validCCNumError.style.display = 'none';
+validCCNumError.style.color = 'red';
+
+const validCCZipError = document.createElement('p');
+validCCZipError.textContent = 'Please Enter a Zip Code';
+CCZipDiv.appendChild(validCCZipError);
+validCCZipError.style.display = 'none';
+validCCZipError.style.color = 'red';
+
+const validCCVError = document.createElement('p');
+validCCVError.textContent = 'Please Enter the Security Code';
+CCVDiv.appendChild(validCCVError);
+validCCVError.style.display = 'none';
+validCCVError.style.color = 'red';
+
+const missingRequiredAlert = document.createElement('p');
+missingRequiredAlert.textContent = 'Please fill out the required fields *';
+missingRequiredAlert.style.color = 'red';
+form.insertBefore(missingRequiredAlert, fieldsetBasic);
+missingRequiredAlert.style.display = 'none';
+
+
+/* Functions --------*/
 
 const setFocus = () => {
   inputName.focus();
@@ -63,14 +125,14 @@ const toggleCheckboxes = (e) => {
   for (let i = 0; i < cboxActivities.length; i += 1) {
     cboxList['checkbox' + (i + 1)] = cboxActivities[i];
   }
-  // if the clicked checkbox's name value = 'js-frameworks'
-  // disable the checkboxes with conflicting times
   if (nameValue === 'all') {
     if (checked) {
       cost += 200;
     } else {
       cost -= 200;
     }
+  // if the clicked checkbox's name value = 'js-frameworks'
+  // disable the checkboxes with conflicting times
   } else if (nameValue === 'js-frameworks') {
     if (checked) {
       // disabled conflicting checkboxes
@@ -89,7 +151,23 @@ const toggleCheckboxes = (e) => {
       cboxList.checkbox2.removeAttribute('disabled');
       cost -= 100;
     }
-  } else if (nameValue === 'node' || nameValue === 'js-libs' || nameValue === 'build-tools' || nameValue === 'npm') {
+  } else if (nameValue === 'js-libs') {
+    if (checked) {
+      cboxList.checkbox5.disabled = 'true';
+      cost += 100;
+    } else {
+      cboxList.checkbox5.removeAttribute('disabled');
+      cost -= 100;
+    }
+  } else if (nameValue === 'node') {
+    if (checked) {
+      cboxList.checkbox3.disabled = 'true';
+      cost += 100;
+    } else {
+      cboxList.checkbox3.removeAttribute('disabled');
+      cost -= 100;
+    }
+  } else if (nameValue === 'build-tools' || nameValue === 'npm') {
     if (checked) {
       cost += 100;
     } else {
@@ -109,22 +187,137 @@ const toggleCheckboxes = (e) => {
 const payment = (e) => {
   const paymentMethod = e.target.value;
   if (paymentMethod === 'credit card') {
+    // Credit Card isn't set valid until both CC & Zip are true
+    validPayment = false;
     creditDiv.style.display = '';
     paypalDiv.style.display = 'none';
     bitcoinDiv.style.display = 'none';
   } else if (paymentMethod === 'paypal') {
+    validPayment = true;
     paypalDiv.style.display = '';
     creditDiv.style.display = 'none';
     bitcoinDiv.style.display = 'none';
   } else if (paymentMethod === 'bitcoin') {
+    validPayment = true;
     bitcoin.style.display = ''
     creditDiv.style.display = 'none';
     paypalDiv.style.display = 'none';
   }
 }
 
+/* Validation Checks ----------*/
 
-/* Default Conditions */
+const validation = () => {
+  validCheckbox = validationCheckboxes();
+  if (validCCZip && validCCNum & validCCV) {
+    validPayment = true;
+  } else {
+    validPayment = false;
+  }
+  console.log('hello');
+  if (validName && validEmail && validCheckbox && validPayment) {
+    console.log('true');
+    return true;
+    console.log(true);
+  } else {
+    missingRequired();
+    return false;
+  }
+}
+
+const validationName = () => {
+  if (inputName.value.length === 0 || inputName.value.length > 20) {
+    inputName.style.borderColor = 'red';
+    validNameError.style.display = '';
+    validName = false;
+  } else {
+    validNameError.style.display = 'none';
+    inputName.style.borderColor ='';
+    validName = true;
+  }
+}
+
+const validationEmail = () => {
+  const emailCheck = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+  if (emailCheck.test(inputEmail.value)) {
+    validEmailError.style.display = 'none';
+    inputEmail.style.borderColor ='';
+    validEmail = true;
+  } else {
+    inputEmail.style.borderColor = 'red';
+    validEmailError.style.display = '';
+    validEmail = false;
+  }
+}
+
+const validationCheckboxes = () => {
+  let validCbox = false;
+  for (let i = 0; i < cboxActivities.length; i += 1) {
+    if (cboxActivities[i].checked) {
+      validCbox = true;
+      break;
+    }
+  }
+  if (validCbox) {
+    validCheckboxError.style.display = 'none';
+    cboxLegend.style.marginBottom = '';
+  } else {
+    validCheckboxError.style.display = '';
+    cboxLegend.style.marginBottom = 0;
+  }
+}
+
+const validationCCNum = () => {
+  if (inputCCNum.value.length === 0) {
+    validCCNumError.style.display = '';
+    validCCNumError.textContent = 'Please Enter a Credit Card';
+    inputCCNum.style.borderColor = 'red';
+    validCCNum = false;
+  } else if (inputCCNum.value.length < 13 || inputCCNum.value.length > 16) {
+    validCCNumError.style.display = '';
+    validCCNumError.textContent = 'Credit Card must be between 13 and 16 digits long.';
+    inputCCNum.style.borderColor = 'red';
+    validCCNum = false;
+  } else {
+    validCCNum = true;
+    validCCNumError.style.display = 'none';
+    inputCCNum.style.borderColor = '';
+  }
+}
+
+const validationCCZip = () => {
+  if (inputCCZip.value.length !== 5) {
+    validCCZip = false;
+    validCCZipError.style.display = '';
+    inputCCZip.style.borderColor = 'red';
+  } else {
+    validCCZip = true;
+    validCCZipError.style.display = 'none';
+    inputCCZip.style.borderColor = '';
+  }
+}
+
+const validationCCV = () => {
+  if (inputCCV.value.length !== 3) {
+    validCCV = false;
+    validCCVError.style.display = '';
+    inputCCV.style.borderColor = 'red';
+  } else {
+    validCCV = true;
+    validCCVError.style.display = 'none';
+    inputCCV.style.borderColor = '';
+  }
+}
+
+const missingRequired = () => {
+  missingRequiredAlert.style.display = '';
+  inputEmail.style.borderColor = 'red';
+  inputCCNum.style.borderColor = 'red';
+  inputCCZip.style.borderColor = 'red';
+  inputCCV.style.borderColor = 'red';
+}
+
+/* Default Conditions --------*/
 
 // Sets mouse focus on input for name
 document.onload = setFocus();
@@ -136,7 +329,7 @@ paypalDiv.style.display = 'none';
 bitcoinDiv.style.display = 'none';
 
 
-/* Event Listeners */
+/* Event Listeners -------*/
 
 // listens for a change in the selection input
 selectJobRole.addEventListener('change', (e) => {
@@ -173,5 +366,10 @@ selectDesign.addEventListener('change', (e) => {
 fieldsetActivities.addEventListener('change', toggleCheckboxes);
 selectPayment.addEventListener('change', payment);
 
-// if user selects 2 disable 4,
-// 3 disable 5
+/* Validation Listeners */
+
+inputName.addEventListener('blur', validationName);
+inputEmail.addEventListener('blur', validationEmail);
+inputCCNum.addEventListener('blur', validationCCNum);
+inputCCZip.addEventListener('blur', validationCCZip);
+inputCCV.addEventListener('blur', validationCCV);

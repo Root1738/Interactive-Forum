@@ -15,7 +15,7 @@
       <h1>Full Stack Conf</h1>
     </header>
 
-    <form action="index.html" method="post">
+    <form action="index.html" method="post" onsubmit="return validation()">
 
       <fieldset class="basic">
         <legend>Basic Info</legend>
@@ -97,17 +97,17 @@
 
         <div id="credit-card" class="credit-card">
 
-          <div class="col-6 col">
+          <div class="col-6 col" id="cc-num-div">
             <label for="cc-num">Card Number:</label>
         	  <input id="cc-num" name="user_cc-num" type="text">
           </div>
 
-          <div class="col-3 col">
+          <div class="col-3 col" id="cc-zip-div">
             <label for="zip">Zip Code:</label>
             <input id="zip" name="user_zip" type="text">
           </div>
 
-          <div class="col-3 col">
+          <div class="col-3 col" id="cc-v-div">
             <label for="cvv">CVV:</label>
             <input id="cvv" name="user_cvv" type="text">
           </div>
