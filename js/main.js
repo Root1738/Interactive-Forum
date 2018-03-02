@@ -14,6 +14,8 @@ const cboxActivities = document.querySelectorAll('.activities input');
 const priceLabel = document.createElement('label');
 const selectPayment = document.querySelector('#payment');
 const paymentOptions = selectPayment.options;
+const submitButton = document.querySelector('form button');
+const colorDiv = document.querySelector('#colors-js-puns');
 const creditDiv = document.querySelector('#credit-card');
 const paypalDiv = document.querySelector('#paypal');
 const bitcoinDiv = document.querySelector('#bitcoin');
@@ -60,19 +62,19 @@ validCheckboxError.style.color = 'red';
 
 const validCCNumError = document.createElement('p');
 validCCNumError.textContent = 'Please Enter a Credit Card';
-CCNumDiv.appendChild(validCCNumError);
+creditDiv.insertBefore(validCCNumError, creditDiv.childNodes[0]);
 validCCNumError.style.display = 'none';
 validCCNumError.style.color = 'red';
 
 const validCCZipError = document.createElement('p');
 validCCZipError.textContent = 'Please Enter a Zip Code';
-CCZipDiv.appendChild(validCCZipError);
+creditDiv.insertBefore(validCCZipError, creditDiv.childNodes[0]);
 validCCZipError.style.display = 'none';
 validCCZipError.style.color = 'red';
 
 const validCCVError = document.createElement('p');
 validCCVError.textContent = 'Please Enter the Security Code';
-CCVDiv.appendChild(validCCVError);
+creditDiv.insertBefore(validCCVError, creditDiv.childNodes[0]);
 validCCVError.style.display = 'none';
 validCCVError.style.color = 'red';
 
@@ -114,6 +116,7 @@ const jsHideShirts = () => {
     colorOptions[i].style.display = '';
   }
 }
+
 
 const toggleCheckboxes = (e) => {
   // storing clicked checkbox's name value
@@ -182,6 +185,7 @@ const toggleCheckboxes = (e) => {
   } else {
     priceLabel.style.display = 'none';
   }
+  validationCheckboxes();
 }
 
 const payment = (e) => {
@@ -202,28 +206,15 @@ const payment = (e) => {
     bitcoin.style.display = ''
     creditDiv.style.display = 'none';
     paypalDiv.style.display = 'none';
+  } else {
+    validPayment = false;
+    creditDiv.style.display = 'none';
+    paypalDiv.style.display = 'none';
+    bitcoinDiv.style.display = 'none';
   }
 }
 
 /* Validation Checks ----------*/
-
-const validation = () => {
-  validCheckbox = validationCheckboxes();
-  if (validCCZip && validCCNum & validCCV) {
-    validPayment = true;
-  } else {
-    validPayment = false;
-  }
-  console.log('hello');
-  if (validName && validEmail && validCheckbox && validPayment) {
-    console.log('true');
-    return true;
-    console.log(true);
-  } else {
-    missingRequired();
-    return false;
-  }
-}
 
 const validationName = () => {
   if (inputName.value.length === 0 || inputName.value.length > 20) {
@@ -264,6 +255,21 @@ const validationCheckboxes = () => {
   } else {
     validCheckboxError.style.display = '';
     cboxLegend.style.marginBottom = 0;
+  }
+  return validCbox;
+}
+
+const validationPayment = () => {
+  if (selectPayment.value === 'credit card') {
+    if (validCCZip && validCCNum & validCCV) {
+      return true;
+    } else {
+      return false;
+    }
+  } else if (selectPayment.value === 'paypal' || selectPayment.value === 'bitcoin') {
+    return true;
+  } else {
+    return false;
   }
 }
 
@@ -317,16 +323,31 @@ const missingRequired = () => {
   inputCCV.style.borderColor = 'red';
 }
 
+const validation = () => {
+  validCheckbox = validationCheckboxes();
+  validPayment = validationPayment();
+  if (validName && validEmail && validCheckbox && validPayment) {
+    missingRequiredAlert.style.display = 'none';
+    return true;
+  } else {
+    missingRequired();
+    return false;
+  }
+}
+
 /* Default Conditions --------*/
 
 // Sets mouse focus on input for name
 document.onload = setFocus();
 // hides the textfield to enter an 'other' job role.
 inputJobRole.style.display = 'none';
+// hides the t-shirt color selector until a theme is chosen.
+colorDiv.style.display = 'none';
 // Sets the initial payment method to credit card
 selectPayment.value = paymentOptions[1].value
 paypalDiv.style.display = 'none';
 bitcoinDiv.style.display = 'none';
+
 
 
 /* Event Listeners -------*/
@@ -349,17 +370,17 @@ selectDesign.addEventListener('change', (e) => {
   // if theme is 'js puns'
   if (val === 'js puns') {
     // display shirts 1-3, hide shirts 4-6
+    colorDiv.style.display = '';
     pHideShirts(val);
   // else if theme is 'heart js'
   } else if (val === 'heart js') {
     // hide shirts 1-3, display shirts 4-6
+    colorDiv.style.display = '';
     jsHideShirts(val);
   // if theme is not selected
   } else {
     // display all shirts
-    for (let i = 0; i < colorOptions.length; i += 1) {
-      colorOptions[i].style.display = '';
-    }
+    colorDiv.style.display = 'none';
   }
 });
 
@@ -373,3 +394,12 @@ inputEmail.addEventListener('blur', validationEmail);
 inputCCNum.addEventListener('blur', validationCCNum);
 inputCCZip.addEventListener('blur', validationCCZip);
 inputCCV.addEventListener('blur', validationCCV);
+
+submitButton.addEventListener('click', (e) => {
+  if (validation()) {
+    console.log('Success!');
+  } else {
+    e.preventDefault();
+    console.log('Form has invalid fields.');
+  }
+});
